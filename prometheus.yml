@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'supply-chain-services'
+    static_configs:
+      - targets: ['ats:8000', 'sourcing:8000', 'transport:8000']
