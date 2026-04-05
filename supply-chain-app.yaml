@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supply-chain-app
+  labels:
+    app: supply-chain
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supply-chain
+  template:
+    metadata:
+      labels:
+        app: supply-chain
+      annotations:
+        # This tells Prometheus to automatically find your metrics!
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+    spec:
+      containers:
+      - name: app
+        image: docker.io/library/supply-chain-app:v1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supply-chain-service
+spec:
+  selector:
+    app: supply-chain
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: ClusterIP
