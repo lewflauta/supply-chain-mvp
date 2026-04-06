@@ -38,7 +38,7 @@ async def ship():
     return {"status": "In Transit", "eta": "2 days"}
 
 # Mount Prometheus metrics endpoint
-#app.mount("/metrics", make_asgi_app())
+app.mount("/metrics", make_asgi_app())
 
 if __name__ == "__main__":
     import uvicorn

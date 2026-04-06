@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: supply-chain-monitor
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  # This tells it to look for the service in 'default'
+  namespaceSelector:
+    matchNames:
+    - default
+  selector:
+    matchLabels:
+      app: supply-chain
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 15s
