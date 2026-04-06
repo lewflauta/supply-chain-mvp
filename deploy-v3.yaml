@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: supply-chain
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supply-chain-service
+  namespace: supply-chain
+spec:
+  selector:
+    app: supply-chain
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supply-chain-v3
+  namespace: supply-chain
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supply-chain
+  template:
+    metadata:
+      labels:
+        app: supply-chain
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+    spec:
+      containers:
+      - name: supply-chain-container
+        image: supply-chain:v3
+        imagePullPolicy: Never  # Tells k3s to use the image you just imported
+        ports:
+        - containerPort: 8000
+        env:
+        - name: SERVICE_TYPE
+          value: "sourcing" # You can change this to 'ats' or 'transport'
+        # --- SRE BEST PRACTICE: Health Probes ---
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
